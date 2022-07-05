@@ -6,8 +6,8 @@
 #define L_MAC   8
 #define L_L  2
 #define LA        16  // Length of additional
-#define L_ENC     2  //
-#define L_HEADER  LA+L_ENC+L_MAC  /**< length of message payload> **/
+#define L_ENC     2  // Length of service
+#define L_HEADER  LA+L_ENC+L_MAC  // length of message payload
 
 typedef struct {
     unsigned char random[4];
@@ -15,7 +15,7 @@ typedef struct {
 }Nonce;
 
 typedef struct {
-  uint8_t id_mote[2];  // 2 bytes (last bytes of physical MAC addr)
+  uint8_t id_mote[2];  // 2 bytes (last bytes of hardware MAC addr)
 	uint8_t crypto_suite;
 	Nonce nonce;
 	uint16_t service;

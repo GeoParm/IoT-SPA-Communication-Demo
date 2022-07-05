@@ -93,7 +93,7 @@ PROCESS_THREAD(spa_client_process, ev, data)
   };  // initialize a message header
 
   uip_ipaddr_t dest_ipaddr;
-    uip_ip6addr(&dest_ipaddr, 0xfd00, 0, 0, 0, 0, 0, 0, 1);
+    uip_ip6addr(&dest_ipaddr, 0xfd00, 0, 0, 0, 0, 0, 0, 1);  // Set the gateway-controller address as the destination address.
 
   uint64_t * c = spa_msg_content.nonce.counter;
 

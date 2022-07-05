@@ -34,10 +34,10 @@ int main(int argc, char *argv[])
 
    memset(&sin6, 0, sin6len);
 
-  // The listening port is either the default one (5678) or
+  // The listening port is either the default one (5240) or
   // the one provided as argument.
   if (argc == 1){
-    gateway_controller_port = 5678;
+    gateway_controller_port = 5240;
   }
   else if (argc == 2){
     gateway_controller_port = atoi(argv[1]);
