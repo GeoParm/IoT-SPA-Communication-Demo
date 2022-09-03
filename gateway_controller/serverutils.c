@@ -24,9 +24,7 @@ void ufw_allow_ip_port(char *device_ip, short int port, int mode, int delay)
 
         
 
-        char port_str[10];
-        // itoa(port, port_str, 10);
-
+      
         char * command = (char *)malloc(100*sizeof(char));
         char * delay_str = (char *)malloc(100*sizeof(char));
         strcpy(command, "ufw ");
@@ -36,7 +34,7 @@ void ufw_allow_ip_port(char *device_ip, short int port, int mode, int delay)
         strcat(command, device_ip);
         strcat(command, " to any port");
 
-        // strcat(command, port_str);
+        
         sprintf(command, "%s %hd", command, port);
         if (delay > 0){
             sprintf(delay_str, "echo '%s'|at now + %d min", command, delay);

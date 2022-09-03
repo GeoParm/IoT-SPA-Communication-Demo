@@ -11,6 +11,7 @@
 #define DEVICEID_BYTES  2
 
 #define KEY_LEN DTLS_CCM_BLOCKSIZE
+
 #define N_DEVICES 1
 
 #define RULES_TIMEOUT 2

@@ -18,12 +18,12 @@
 #define SPA_SERVER_PORT	5678
 #define SPA_CLIENT_PORT	8765
 
-#define UDP_SERVER_PORT	5000
-#define UDP_CLIENT_PORT	5000
+#define UDP_SERVER_PORT	5240
+#define UDP_CLIENT_PORT	5240
 
 #define RETRIES_THRESHOLD 3
 
-#define SEND_INTERVAL		  (60 * CLOCK_SECOND)
+#define SPA_SEND_INTERVAL		  (60 * CLOCK_SECOND)
 #define UDP_SEND_INTERVAL		  (30 * CLOCK_SECOND)
 
 #ifdef HAVE_ASSERT_H
@@ -33,7 +33,7 @@
 static struct simple_udp_connection spa_conn, udp_conn;
 
 long int len;
-int n;
+
 
 static unsigned counter_snd = 0;  // counter of the outgoing messages
 static unsigned counter_rcv = 0;  // counter of the incoming messages
@@ -76,7 +76,7 @@ PROCESS_THREAD(spa_client_process, ev, data)
    { 0xC0, 0xC1, 0xC2, 0xC3, 0xC4, 0xC5, 0xC6, 0xC7, 0xC8, 0xC9, 0xCA, 0xCB, 0xCC, 0xCD, 0xCE, 0xCF};	/* AES key */;
   unsigned char nonce_payload[DTLS_CCM_NONCE_SIZE + 1];
   unsigned char aad[LA];
-  unsigned char header_payload[L_HEADER];
+  unsigned char spa_header_payload[L_HEADER];
   static uint64_t counter = 0;
 
   Nonce nonce = {
@@ -90,7 +90,7 @@ PROCESS_THREAD(spa_client_process, ev, data)
     0,  // encryption type
     nonce,
     UDP_SERVER_PORT  // port of the required service
-  };  // initialize a message header
+  };  // initialize the data that are required for the encryption to create the SPA packet 
 
   uip_ipaddr_t dest_ipaddr;
     uip_ip6addr(&dest_ipaddr, 0xfd00, 0, 0, 0, 0, 0, 0, 1);  // Set the gateway-controller address as the destination address.
@@ -103,7 +103,7 @@ PROCESS_THREAD(spa_client_process, ev, data)
   simple_udp_register(&spa_conn, SPA_CLIENT_PORT, NULL,
                       SPA_SERVER_PORT, udp_rx_callback);
 
-  etimer_set(&periodic_timer, random_rand() % SEND_INTERVAL);
+  etimer_set(&periodic_timer, random_rand() % SPA_SEND_INTERVAL);
   while(1) {
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&periodic_timer));
 
@@ -128,29 +128,29 @@ PROCESS_THREAD(spa_client_process, ev, data)
         // dump(p, LA);
 
       // Copy the text to encrypt in the final payload buffer
-      memcpy(&header_payload, p, len_aad);
+      memcpy(&spa_header_payload, p, len_aad);
       LOG_INFO("Length of additional : %d.\n", len_aad);
         // Copy the text to encrypt in the final payload buffer
       uint16_t * srv = (uint16_t *)(&spa_msg_content.service);
 
-      memcpy((unsigned char *)(&header_payload)+len_aad, srv, sizeof(spa_msg_content.service));
+      memcpy((unsigned char *)(&spa_header_payload)+len_aad, srv, sizeof(spa_msg_content.service));
       LOG_INFO("Text to encrypt ");
-      dump(header_payload + LA, L_ENC);
+      dump(spa_header_payload + LA, L_ENC);
 
       unsigned char * key_p = (unsigned char *)(&key);
-      long int len = ccm_encrypt(header_payload, key_p,
+      long int len = ccm_encrypt(spa_header_payload, key_p,
                                   nonce_payload,
                                   aad);
         *c = next_counter(*c);  // increase counter
 
-        simple_udp_sendto(&spa_conn, header_payload, len, &dest_ipaddr);
+        simple_udp_sendto(&spa_conn, spa_header_payload, len, &dest_ipaddr);
       } else {
         LOG_INFO("Not reachable yet\n");
       }
     }
 
     /* Add some jitter */
-    etimer_set(&periodic_timer, SEND_INTERVAL
+    etimer_set(&periodic_timer, SPA_SEND_INTERVAL
       - CLOCK_SECOND + (random_rand() % (2 * CLOCK_SECOND)));
   }
 
@@ -172,7 +172,7 @@ PROCESS_THREAD(udp_client_process, ev, data)
   simple_udp_register(&udp_conn, UDP_CLIENT_PORT, NULL,
                       UDP_SERVER_PORT, udp_rx_callback);
 
-  etimer_set(&periodic_timer, random_rand() % SEND_INTERVAL);
+  etimer_set(&periodic_timer, random_rand() % SPA_SEND_INTERVAL);
   while(1) {
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&periodic_timer));
 

@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
    int status, s_out;
    struct sockaddr_in6 sin6;
    int sin6len;
-   int gateway_controller_port;
+   int app_server_port;
 
    unsigned char buffer[MAXBUF];  // array to store incoming data from recvfrom function
    char * response = (char *)malloc(50*sizeof(char));
@@ -37,16 +37,16 @@ int main(int argc, char *argv[])
   // The listening port is either the default one (5240) or
   // the one provided as argument.
   if (argc == 1){
-    gateway_controller_port = 5240;
+    app_server_port = 5240;
   }
   else if (argc == 2){
-    gateway_controller_port = atoi(argv[1]);
+    app_server_port = atoi(argv[1]);
   }
   else{
     printf("Invalid number of arguments. Exiting.. ");
     return -1;
   }
-   sin6.sin6_port = htons(gateway_controller_port);
+   sin6.sin6_port = htons(app_server_port);
    sin6.sin6_family = AF_INET6;
    sin6.sin6_addr = in6addr_any;
 
